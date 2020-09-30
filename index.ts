@@ -10,7 +10,16 @@ app.use(cors())
 const PORT = 9000;
 app.get('/', (req, res) => res.send('Xpress + TypeScript Server'));
 app.get('/map', async(req, res) => {
-  const data = await GameObject.find();
+  const data = await GameObject.find({
+    x: {
+      $gte: parseInt((req.query.xMin || "").toString()),
+      $lte: parseInt((req.query.xMax || "").toString()),
+    },
+    y: {
+      $gte: parseInt((req.query.yMin || "").toString()),
+      $lte: parseInt((req.query.yMax || "").toString()),
+    },
+  });
   res.send(data)
 });
 app.get('/refresh', async(req, res) => {
