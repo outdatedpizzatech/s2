@@ -1,16 +1,45 @@
+import http from "http";
 import express from 'express';
-import {GameObject, IGameObject} from "./src/db";
+import {GameObject, IGameObject, Player} from "./src/db";
 import { readFile } from "fs";
 import * as util from "util";
 import * as path from "path";
 import cors from "cors";
+import socketio from "socket.io";
+
 // rest of the code remains same
+
+const socketPlayerRegistry = {} as { [key: string]: string };
+
 const app = express();
+const httpServer = http.createServer(app)
+const io = socketio(httpServer);
+io.on('connection', (socket) => {
+  socket.on('disconnect', async() => {
+    console.log('user disconnected');
+    console.log(socketPlayerRegistry);
+    await Player.deleteOne({ clientId: socketPlayerRegistry[socket.id] })
+  });
+
+  socket.on('player moved', (msg) => {
+    console.log('message: ' + msg);
+  });
+  socket.on('PLAYER_JOIN', async(player) => {
+    socketPlayerRegistry[socket.id] = player.clientId;
+    io.emit('PLAYER_JOIN', player)
+    await Player.create(player);
+  });
+  socket.on('PLAYER_MOVE', async(message) => {
+    const { clientId, x, y } = message;
+    io.emit('PLAYER_MOVE', message);
+    await Player.update({ clientId }, { $inc: { x, y }});
+  });
+});
 app.use(cors())
 const PORT = 9000;
 app.get('/', (req, res) => res.send('Xpress + TypeScript Server'));
 app.get('/map', async(req, res) => {
-  const data = await GameObject.find({
+  const gameObjects = await GameObject.find({
     x: {
       $gte: parseInt((req.query.xMin || "").toString()),
       $lte: parseInt((req.query.xMax || "").toString()),
@@ -20,10 +49,17 @@ app.get('/map', async(req, res) => {
       $lte: parseInt((req.query.yMax || "").toString()),
     },
   });
+  const players = await Player.find();
+  console.log("players...", players);
+  res.send(gameObjects.concat(players))
+});
+app.get('/players', async(req, res) => {
+  const data = await Player.find();
   res.send(data)
 });
 app.get('/refresh', async(req, res) => {
   await GameObject.deleteMany({});
+  await Player.deleteMany({});
 
   const gameObjects = new Array<any>();
 
@@ -133,6 +169,6 @@ app.get('/refresh', async(req, res) => {
 
   res.status(200).end();
 });
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`⚡️[server]: Server is running at https://localhost:${PORT}`);
-});
+})
