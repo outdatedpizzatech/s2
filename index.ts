@@ -17,8 +17,12 @@ const io = socketio(httpServer);
 io.on('connection', (socket) => {
   socket.on('disconnect', async() => {
     console.log('user disconnected');
-    console.log(socketPlayerRegistry);
-    await Player.deleteOne({ clientId: socketPlayerRegistry[socket.id] })
+    await Player.deleteOne({ clientId: socketPlayerRegistry[socket.id] });
+    io.emit('PLAYER_LEAVE', socketPlayerRegistry[socket.id]);
+    const registryKey = Object.keys(socketPlayerRegistry).find(key => socketPlayerRegistry[key] === socket.id);
+    if(registryKey){
+      delete socketPlayerRegistry[registryKey];
+    }
   });
 
   socket.on('player moved', (msg) => {
@@ -33,6 +37,11 @@ io.on('connection', (socket) => {
     const { clientId, x, y } = message;
     io.emit('PLAYER_MOVE', message);
     await Player.update({ clientId }, { $inc: { x, y }});
+  });
+  socket.on('PLAYER_FACING_DIRECTION', async(message) => {
+    const { clientId, x, y } = message;
+    io.emit('PLAYER_FACING_DIRECTION', message);
+    await Player.update({ clientId }, { $set: { facingDirection: message.facingDirection }});
   });
 });
 app.use(cors())
