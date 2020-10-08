@@ -6,12 +6,14 @@ import * as util from "util";
 import * as path from "path";
 import cors from "cors";
 import socketio from "socket.io";
+import bodyParser from "body-parser";
 
 // rest of the code remains same
 
 const socketPlayerRegistry = {} as { [key: string]: string };
 
 const app = express();
+app.use(bodyParser.json())
 const httpServer = http.createServer(app)
 const io = socketio(httpServer);
 io.on('connection', (socket) => {
@@ -62,6 +64,11 @@ app.get('/map', async(req, res) => {
   console.log("players...", players);
   res.send(gameObjects.concat(players))
 });
+app.post('/game_objects', async(req, res) => {
+  console.log("boday", req.body);
+  await GameObject.create(req.body);
+  res.status(201).end();
+});
 app.get('/players', async(req, res) => {
   const data = await Player.find();
   res.send(data)
@@ -81,7 +88,7 @@ app.get('/refresh', async(req, res) => {
       if (code == "x") {
         gameObjects.push({
           objectType: "Wall",
-          layer: "interactive",
+          layer: 2,
           x,
           y,
         });
@@ -89,7 +96,7 @@ app.get('/refresh', async(req, res) => {
       if (code == "l") {
         gameObjects.push({
           objectType: "Tree",
-          layer: "interactive",
+          layer: 2,
           x,
           y,
         });
@@ -97,7 +104,7 @@ app.get('/refresh', async(req, res) => {
       if (code == "o") {
         gameObjects.push({
           objectType: "Water",
-          layer: "interactive",
+          layer: 2,
           x,
           y,
         });
@@ -105,7 +112,7 @@ app.get('/refresh', async(req, res) => {
       if (code == "m") {
         gameObjects.push({
           objectType: "Street",
-          layer: "ground",
+          layer: 0,
           x,
           y,
         });
@@ -113,14 +120,14 @@ app.get('/refresh', async(req, res) => {
       if (code == "u") {
         gameObjects.push({
           objectType: "HouseWall",
-          layer: "interactive",
+          layer: 2,
           x,
           y,
           role: "side"
         });
         gameObjects.push({
           objectType: "Roof",
-          layer: "overhead",
+          layer: 3,
           x,
           y,
           groupId: 1
@@ -129,13 +136,13 @@ app.get('/refresh', async(req, res) => {
       if (code == "r") {
         gameObjects.push({
           objectType: "HouseFloor",
-          layer: "ground",
+          layer: 0,
           x,
           y,
         });
         gameObjects.push({
           objectType: "Roof",
-          layer: "overhead",
+          layer: 3,
           x,
           y,
           groupId: 1
@@ -144,7 +151,7 @@ app.get('/refresh', async(req, res) => {
       if (code == "n") {
         gameObjects.push({
           objectType: "HouseWall",
-          layer: "interactive",
+          layer: 2,
           x,
           y,
           role: "front"
@@ -153,19 +160,19 @@ app.get('/refresh', async(req, res) => {
       if (code == "d") {
         gameObjects.push({
           objectType: "HouseFloor",
-          layer: "ground",
+          layer: 0,
           x,
           y,
         });
         gameObjects.push({
           objectType: "Door",
-          layer: "passive",
+          layer: 1,
           x,
           y,
         });
         gameObjects.push({
           objectType: "Empty",
-          layer: "overhead",
+          layer: 3,
           x,
           y,
           groupId: 1

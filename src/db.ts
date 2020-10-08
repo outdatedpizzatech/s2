@@ -24,7 +24,7 @@ export interface IPlayer extends Document {
 
 const GameObjectSchema = new Schema({
   objectType: String,
-  layer: String,
+  layer: Number,
   role: String,
   groupId: Number,
   x: Number,
@@ -36,7 +36,7 @@ const PlayerSchema = new Schema({
   x: Number,
   y: Number,
   objectType: String,
-  layer: String,
+  layer: Number,
 });
 
 export const GameObject = mongoose.model<IGameObject>("GameObject", GameObjectSchema);
