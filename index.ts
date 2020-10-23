@@ -1,9 +1,6 @@
 import http from "http";
 import express from 'express';
-import {GameObject, IGameObject, Player} from "./src/db";
-import { readFile } from "fs";
-import * as util from "util";
-import * as path from "path";
+import {GameObject, Player} from "./src/db";
 import cors from "cors";
 import socketio from "socket.io";
 import bodyParser from "body-parser";
