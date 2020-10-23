@@ -32,7 +32,8 @@ io.on('connection', (socket) => {
   });
   socket.on('PLAYER_JOIN', async(player) => {
     socketPlayerRegistry[socket.id] = player.clientId;
-    io.emit('PLAYER_JOIN', player)
+    io.emit('PLAYER_JOIN', player);
+    delete player._id;
     await Player.create(player);
   });
   socket.on('PLAYER_MOVE', async(message) => {
@@ -61,129 +62,23 @@ app.get('/map', async(req, res) => {
     },
   });
   const players = await Player.find();
-  console.log("players...", players);
   res.send(gameObjects.concat(players))
 });
 app.post('/game_objects', async(req, res) => {
-  console.log("boday", req.body);
-  await GameObject.create(req.body);
-  res.status(201).end();
+  const gameObject = await GameObject.create(req.body);
+  res.status(201).send(gameObject);
+});
+app.patch('/game_objects/:id', async(req, res) => {
+  const gameObject = await GameObject.update({ _id: req.params.id }, { groupId: req.body.groupId });
+  res.status(204).send(gameObject);
+});
+app.delete('/game_objects/:id', async(req, res) => {
+  await GameObject.deleteOne({ _id: req.params.id });
+  res.status(204).end();
 });
 app.get('/players', async(req, res) => {
   const data = await Player.find();
   res.send(data)
-});
-app.get('/refresh', async(req, res) => {
-  await GameObject.deleteMany({});
-  await Player.deleteMany({});
-
-  const gameObjects = new Array<any>();
-
-  const readFilePromise = util.promisify(readFile);
-
-  const data = await readFilePromise(path.resolve(__dirname, "src/maps/corneria.txt"), "utf8")
-
-  data.split(/\n/).forEach((line, y) => {
-    line.split("").forEach((code, x) => {
-      if (code == "x") {
-        gameObjects.push({
-          objectType: "Wall",
-          layer: 2,
-          x,
-          y,
-        });
-      }
-      if (code == "l") {
-        gameObjects.push({
-          objectType: "Tree",
-          layer: 2,
-          x,
-          y,
-        });
-      }
-      if (code == "o") {
-        gameObjects.push({
-          objectType: "Water",
-          layer: 2,
-          x,
-          y,
-        });
-      }
-      if (code == "m") {
-        gameObjects.push({
-          objectType: "Street",
-          layer: 0,
-          x,
-          y,
-        });
-      }
-      if (code == "u") {
-        gameObjects.push({
-          objectType: "HouseWall",
-          layer: 2,
-          x,
-          y,
-          role: "side"
-        });
-        gameObjects.push({
-          objectType: "Roof",
-          layer: 3,
-          x,
-          y,
-          groupId: 1
-        });
-      }
-      if (code == "r") {
-        gameObjects.push({
-          objectType: "HouseFloor",
-          layer: 0,
-          x,
-          y,
-        });
-        gameObjects.push({
-          objectType: "Roof",
-          layer: 3,
-          x,
-          y,
-          groupId: 1
-        });
-      }
-      if (code == "n") {
-        gameObjects.push({
-          objectType: "HouseWall",
-          layer: 2,
-          x,
-          y,
-          role: "front"
-        });
-      }
-      if (code == "d") {
-        gameObjects.push({
-          objectType: "HouseFloor",
-          layer: 0,
-          x,
-          y,
-        });
-        gameObjects.push({
-          objectType: "Door",
-          layer: 1,
-          x,
-          y,
-        });
-        gameObjects.push({
-          objectType: "Empty",
-          layer: 3,
-          x,
-          y,
-          groupId: 1
-        });
-      }
-    });
-  });
-
-  await Promise.all(gameObjects.map(gameObject => GameObject.create(gameObject)))
-
-  res.status(200).end();
 });
 httpServer.listen(PORT, () => {
   console.log(`⚡️[server]: Server is running at https://localhost:${PORT}`);

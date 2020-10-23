@@ -1,4 +1,4 @@
-import mongoose, {Schema, Document} from "mongoose";
+import mongoose, {Document, Schema} from "mongoose";
 
 mongoose.connect("mongodb://localhost/s2").then(
   () => {},
@@ -8,8 +8,8 @@ mongoose.connect("mongodb://localhost/s2").then(
 export interface IGameObject extends Document {
   objectType: string,
   layer: string,
-  groupId?: number,
-  role?: string,
+  groupId?: string,
+  role?: number,
   x: number,
   y: number,
 }
@@ -25,8 +25,8 @@ export interface IPlayer extends Document {
 const GameObjectSchema = new Schema({
   objectType: String,
   layer: Number,
-  role: String,
-  groupId: Number,
+  role: Number,
+  groupId: String,
   x: Number,
   y: Number,
 });
