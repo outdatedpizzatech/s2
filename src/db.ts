@@ -9,9 +9,12 @@ export interface IGameObject extends Document {
   objectType: string,
   layer: string,
   groupId?: string,
-  role?: number,
   x: number,
   y: number,
+  scale: {
+    x: number,
+    y: number,
+  }
 }
 
 export interface IPlayer extends Document {
@@ -20,15 +23,22 @@ export interface IPlayer extends Document {
   y: number,
   objectType: string,
   layer: string,
+  scale: {
+    x: number,
+    y: number,
+  }
 }
 
 const GameObjectSchema = new Schema({
   objectType: String,
   layer: Number,
-  role: Number,
   groupId: String,
   x: Number,
   y: Number,
+  scale: {
+    x: Number,
+    y: Number,
+  }
 });
 
 const PlayerSchema = new Schema({
@@ -37,6 +47,10 @@ const PlayerSchema = new Schema({
   y: Number,
   objectType: String,
   layer: Number,
+  scale: {
+    x: Number,
+    y: Number,
+  }
 });
 
 export const GameObject = mongoose.model<IGameObject>("GameObject", GameObjectSchema);
