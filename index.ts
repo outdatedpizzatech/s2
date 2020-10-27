@@ -48,7 +48,7 @@ app.use(cors())
 const PORT = 9000;
 app.get('/', (req, res) => res.send('Xpress + TypeScript Server'));
 app.get('/map', async(req, res) => {
-  const mapId = req.query.mapId || null;
+  const mapId = req.query.mapId?.toString() || null;
 
   const gameObjects = await GameObject.find({
     x: {

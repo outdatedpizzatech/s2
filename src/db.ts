@@ -11,6 +11,7 @@ export interface IGameObject extends Document {
   groupId?: string,
   x: number,
   y: number,
+  mapId?: string | null,
   scale: {
     x: number,
     y: number,
@@ -35,6 +36,7 @@ const GameObjectSchema = new Schema({
   groupId: String,
   x: Number,
   y: Number,
+  mapId: String,
   scale: {
     x: Number,
     y: Number,
