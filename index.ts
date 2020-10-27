@@ -48,6 +48,8 @@ app.use(cors())
 const PORT = 9000;
 app.get('/', (req, res) => res.send('Xpress + TypeScript Server'));
 app.get('/map', async(req, res) => {
+  const mapId = req.query.mapId || null;
+
   const gameObjects = await GameObject.find({
     x: {
       $gte: parseInt((req.query.xMin || "").toString()),
@@ -57,6 +59,7 @@ app.get('/map', async(req, res) => {
       $gte: parseInt((req.query.yMin || "").toString()),
       $lte: parseInt((req.query.yMax || "").toString()),
     },
+    mapId
   });
   const players = await Player.find();
   res.send(gameObjects.concat(players))
