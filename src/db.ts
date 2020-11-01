@@ -24,6 +24,7 @@ export interface IPlayer extends Document {
   y: number,
   objectType: string,
   layer: string,
+  mapId?: string | null,
   scale: {
     x: number,
     y: number,
@@ -49,6 +50,7 @@ const PlayerSchema = new Schema({
   y: Number,
   objectType: String,
   layer: Number,
+  mapId: String,
   scale: {
     x: Number,
     y: Number,

@@ -39,9 +39,14 @@ io.on('connection', (socket) => {
     await Player.update({ clientId }, { $inc: { x, y }});
   });
   socket.on('PLAYER_FACING_DIRECTION', async(message) => {
-    const { clientId, x, y } = message;
+    const { clientId, facingDirection } = message;
     io.emit('PLAYER_FACING_DIRECTION', message);
-    await Player.update({ clientId }, { $set: { facingDirection: message.facingDirection }});
+    await Player.update({ clientId }, { $set: { facingDirection }});
+  });
+  socket.on('PLAYER_GO_TO_MAP', async(message) => {
+    const { clientId, x, y, mapId } = message;
+    io.emit('PLAYER_GO_TO_MAP', message);
+    await Player.update({ clientId }, { $set: { x, y, mapId }});
   });
 });
 app.use(cors())
